@@ -43,12 +43,12 @@ jobs:
         chmod 600 private_key.pem
         ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} << 'EOF'
           # Stop the running container
-          docker stop running_container_name || true
-          docker rm running_container_name || true
+          docker stop flask_application_container || true
+          docker rm flask_application_container || true
           # Pull the new image
           docker pull ${IMAGE_NAME}
           # Run the new container
-          docker run -d --name running_container_name -p 80:80 ${IMAGE_NAME}
+          docker run -d --name flask_application_container -p 80:80 ${IMAGE_NAME}
         EOF
 
     - name: Clean up
