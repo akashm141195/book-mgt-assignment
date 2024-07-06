@@ -6,4 +6,4 @@ WORKDIR /opt/src
 
 RUN pip install -r requirements.txt
 
-CMD ["python" "./book_mgt_api.py"]
+CMD ["python3" "./book_mgt_api.py"]
