@@ -49,21 +49,21 @@ jobs:
           touch /tmp/connected.txt
           container_status_failed=$(docker ps -a|grep flask_application_container|grep exit|wc -l)
           container_status_running=$(docker ps|grep flask_application_container|wc -l)
-          if [ $container_status_running -eq 1 ];
-          # Stop the running container#
-          then
-            docker stop flask_application_container || true
-            docker rm flask_application_container || true
-          elif [ $container_status_failed -eq 1 ];
-            docker rm flask_application_container || true
-          else
-            echo "No running containers"
-          fi
-          # Pull the new image
-          docker pull ${IMAGE_NAME}
-          # Run the new container
-          echo ${DB_PASS}
-          docker run -e DB_USERNAME="postgres" -e DB_PASSWORD="Bookmgtpasswd" -e DB_ENDPOINT="bookdatabase.c9w2goy8ewpw.us-east-1.rds.amazonaws.com:5432" -e DB_NAME="booksdb" -d --name flask_application_container -p 8000:8000 ${IMAGE_NAME}
+          docker run -e DB_USERNAME="postgres" -e DB_PASSWORD=${DB_PASS} -e DB_ENDPOINT="bookdatabase.c9w2goy8ewpw.us-east-1.rds.amazonaws.com:5432" -e DB_NAME="booksdb" -d --name flask_application_container -p 8000:8000 ${IMAGE_NAME}
+          # if [ $container_status_running -eq 1 ];
+          # # Stop the running container#
+          # then
+          #   docker stop flask_application_container || true
+          #   docker rm flask_application_container || true
+          # elif [ $container_status_failed -eq 1 ];
+          #   docker rm flask_application_container || true
+          # else
+          #   echo "No running containers"
+          # fi
+          # # Pull the new image
+          # docker pull ${IMAGE_NAME}
+          # # Run the new container
+          # docker run -e DB_USERNAME="postgres" -e DB_PASSWORD=${DB_PASS} -e DB_ENDPOINT="bookdatabase.c9w2goy8ewpw.us-east-1.rds.amazonaws.com:5432" -e DB_NAME="booksdb" -d --name flask_application_container -p 8000:8000 ${IMAGE_NAME}
         EOF
 
     - name: Clean up
