@@ -62,7 +62,8 @@ jobs:
           # Pull the new image
           docker pull ${IMAGE_NAME}
           # Run the new container
-          docker run -e DB_USERNAME="postgres" -e DB_PASSWORD="${DB_PASS}" -e DB_ENDPOINT="bookdatabase.c9w2goy8ewpw.us-east-1.rds.amazonaws.com:5432" -e DB_NAME="booksdb" -d --name flask_application_container -p 8000:8000 ${IMAGE_NAME}
+          echo ${DB_PASS}
+          docker run -e DB_USERNAME="postgres" -e DB_PASSWORD="Bookmgtpasswd" -e DB_ENDPOINT="bookdatabase.c9w2goy8ewpw.us-east-1.rds.amazonaws.com:5432" -e DB_NAME="booksdb" -d --name flask_application_container -p 8000:8000 ${IMAGE_NAME}
         EOF
 
     - name: Clean up
