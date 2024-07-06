@@ -37,18 +37,29 @@ jobs:
         HOST: ${{ secrets.EC2_HOST }}
         USER: ${{ secrets.EC2_USER }}
         KEY: ${{ secrets.EC2_KEY }}
-        IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/your-image-name:latest
+        IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/book-mgt-image:latest
       run: |
         echo "${KEY}" > private_key.pem
-        chmod 600 private_key.pem
+        chmod 400 private_key.pem
         ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} << 'EOF'
+          # Test
+          touch /tmp/connected.txt
+          container_status_failed=$(docker ps -a|grep flask_application_container|grep exit|wc -l)
+          container_status_running=$(docker ps|grep flask_application_container|wc -l)
+          if [ $container_status_running -eq 1 ];
           # Stop the running container#
-          docker stop flask_application_container || true
-          docker rm flask_application_container || true
+          then
+            docker stop flask_application_container || true
+            docker rm flask_application_container || true
+          elif [ $container_status_failed -eq 1 ];
+            docker rm flask_application_container || true
+          else
+            echo "No running containers"
+          fi
           # Pull the new image
           docker pull ${IMAGE_NAME}
           # Run the new container
-          docker run -d --name flask_application_container -p 80:80 ${IMAGE_NAME}
+          docker run -e DB_USERNAME="postgres" -e DB_PASSWORD="${DB_PASS}" -e DB_ENDPOINT="bookdatabase.c9w2goy8ewpw.us-east-1.rds.amazonaws.com:5432" -e DB_NAME="booksdb" -d --name flask_application_container -p 8000:8000 ${IMAGE_NAME}
         EOF
 
     - name: Clean up
