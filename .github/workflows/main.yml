@@ -42,7 +42,7 @@ jobs:
         echo "${KEY}" > private_key.pem
         chmod 600 private_key.pem
         ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} << 'EOF'
-          # Stop the running container
+          # Stop the running container#
           docker stop flask_application_container || true
           docker rm flask_application_container || true
           # Pull the new image
