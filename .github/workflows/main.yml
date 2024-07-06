@@ -50,7 +50,7 @@ jobs:
           container_status_failed=$(docker ps -a|grep flask_application_container|grep exit|wc -l)
           container_status_running=$(docker ps|grep flask_application_container|wc -l)
           docker pull akashm141195/book-mgt-image:latest
-          docker run -e DB_USERNAME="postgres" -e DB_PASSWORD="Bookmgtpasswd" -e DB_ENDPOINT="bookdatabase.c9w2goy8ewpw.us-east-1.rds.amazonaws.com:5432" -e DB_NAME="booksdb" -d --name flask_application_container -p 8000:8000 akashm141195/book-mgt-image:latest
+          docker run --rm -e DB_USERNAME="postgres" -e DB_PASSWORD="Bookmgtpasswd" -e DB_ENDPOINT="bookdatabase.c9w2goy8ewpw.us-east-1.rds.amazonaws.com:5432" -e DB_NAME="booksdb" -d --name flask_application_container -p 8000:8000 akashm141195/book-mgt-image:latest
           # if [ $container_status_running -eq 1 ];
           # # Stop the running container#
           # then
