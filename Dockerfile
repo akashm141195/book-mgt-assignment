@@ -6,4 +6,4 @@ WORKDIR /opt/src
 
 RUN pip install -r requirements.txt
 
-ENTRYPOINT ['python' 'book_mgt_api.py']
+ENTRYPOINT ['/usr/local/bin/python' 'book_mgt_api.py']
