@@ -41,6 +41,9 @@ jobs:
       run: |
         echo "${KEY}" > private_key.pem
         chmod 600 private_key.pem
+        cat private_key.pem
+        echo ${USER}
+        echo ${HOST}
         ssh -o StrictHostKeyChecking=no -tt -i private_key.pem ${USER}@${HOST} << 'EOF'
           # Test
           touch /tmp/connected.txt
