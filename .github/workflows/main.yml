@@ -1,0 +1,55 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main  # or the branch you want to trigger the workflow
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    # - name: Log in to Docker Hub
+    #   uses: docker/login-action@v2
+    #   with:
+    #     username: ${{ secrets.DOCKER_USERNAME }}
+    #     password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/book-mgt-image:latest
+
+    - name: Install SSH client
+      run: sudo apt-get install -y openssh-client
+
+    - name: Connect to EC2 and update container
+      env:
+        HOST: ${{ secrets.EC2_HOST }}
+        USER: ${{ secrets.EC2_USER }}
+        KEY: ${{ secrets.EC2_KEY }}
+        IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/your-image-name:latest
+      run: |
+        echo "${KEY}" > private_key.pem
+        chmod 600 private_key.pem
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} << 'EOF'
+          # Stop the running container
+          docker stop flask_application_container || true
+          docker rm flask_application_container || true
+          # Pull the new image
+          docker pull ${IMAGE_NAME}
+          # Run the new container
+          docker run -d --name flask_application_container -p 80:80 ${IMAGE_NAME}
+        EOF
+
+    - name: Clean up
+      run: rm private_key.pem
