@@ -15,7 +15,7 @@ import secrets
 import boto3, json
 
 # Initialize AWS client
-secrets_client = boto3.client('secretsmanager')
+secrets_client = boto3.client('secretsmanager', region_name='us-east-1',)
 
 def get_secret(secret_name):
     response = secrets_client.get_secret_value(SecretId=secret_name)
