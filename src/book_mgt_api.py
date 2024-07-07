@@ -12,12 +12,22 @@ from passlib.context import CryptContext
 from sqlalchemy.pool import NullPool
 import os
 import secrets
+import boto3, json
 
-# Initialize DB variables
-DB_USERNAME=os.environ["DB_USERNAME"]
-DB_PASSWORD=os.environ["DB_PASSWORD"]
-DB_ENDPOINT=os.environ["DB_ENDPOINT"]
-DB_NAME=os.environ["DB_NAME"]
+# Initialize AWS client
+secrets_client = boto3.client('secretsmanager')
+
+def get_secret(secret_name):
+    response = secrets_client.get_secret_value(SecretId=secret_name)
+    secret = response['SecretString']
+    return json.loads(secret)
+
+# Fetch secrets from AWS Secrets Manager
+secretsManager = get_secret("book_mgt/db_credentials")
+DB_USERNAME = secretsManager["DB_USERNAME"]
+DB_PASSWORD = secretsManager["DB_PASSWORD"]
+DB_ENDPOINT = secretsManager["DB_ENDPOINT"]
+DB_NAME = secretsManager["DB_NAME"]
 
 DATABASE_URL = f"postgresql+asyncpg://{DB_USERNAME}:{DB_PASSWORD}@{DB_ENDPOINT}/{DB_NAME}"
 
