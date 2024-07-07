@@ -3,12 +3,6 @@ from unittest.mock import patch, AsyncMock, MagicMock
 from fastapi.testclient import TestClient
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-
-import os
-os.environ["DB_USERNAME"] = "test"
-os.environ["DB_PASSWORD"] = "test"
-os.environ["DB_ENDPOINT"] = "test"
-os.environ["DB_NAME"] = "test"
 from book_mgt_api import app, Book, Review, authenticate_user, get_db
 
 class TestBookAPI(unittest.TestCase):

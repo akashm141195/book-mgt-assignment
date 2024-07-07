@@ -14,28 +14,21 @@ import os
 import secrets
 import boto3, json
 
-def get_secret(secret_name):
-    # Initialize AWS client
+def establish_connection():
     secrets_client = boto3.client('secretsmanager', region_name='us-east-1')
-    response = secrets_client.get_secret_value(SecretId=secret_name)
+    response = secrets_client.get_secret_value(SecretId="book_mgt/db_credentials")
     secret = response['SecretString']
-    return json.loads(secret)
+    # Fetch secrets from AWS Secrets Manager
+    secretsManager = json.loads(secret)
+    DB_USERNAME = secretsManager["DB_USERNAME"]
+    DB_PASSWORD = secretsManager["DB_PASSWORD"]
+    DB_ENDPOINT = secretsManager["DB_ENDPOINT"]
+    DB_NAME = secretsManager["DB_NAME"]
 
-# Fetch secrets from AWS Secrets Manager
-secretsManager = get_secret("book_mgt/db_credentials")
-DB_USERNAME = secretsManager["DB_USERNAME"]
-DB_PASSWORD = secretsManager["DB_PASSWORD"]
-DB_ENDPOINT = secretsManager["DB_ENDPOINT"]
-DB_NAME = secretsManager["DB_NAME"]
-
-DATABASE_URL = f"postgresql+asyncpg://{DB_USERNAME}:{DB_PASSWORD}@{DB_ENDPOINT}/{DB_NAME}"
-
-def establish_connection(database_url):
-    engine = create_async_engine(database_url, echo=True, poolclass= NullPool)
+    DATABASE_URL = f"postgresql+asyncpg://{DB_USERNAME}:{DB_PASSWORD}@{DB_ENDPOINT}/{DB_NAME}"
+    engine = create_async_engine(DATABASE_URL, echo=True, poolclass= NullPool)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
     return engine, SessionLocal
-
-engine, SessionLocal = establish_connection(DATABASE_URL)
 
 Base = declarative_base()
 
@@ -196,6 +189,7 @@ import asyncio
 
 
 if __name__ == "__main__":
+    engine, SessionLocal = establish_connection()
     asyncio.run(init_db())
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
