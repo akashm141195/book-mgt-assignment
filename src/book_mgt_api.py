@@ -3,7 +3,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, CheckConstraint
 from sqlalchemy.orm import relationship
 from pydantic import BaseModel
@@ -21,8 +21,13 @@ DB_NAME=os.environ["DB_NAME"]
 
 DATABASE_URL = f"postgresql+asyncpg://{DB_USERNAME}:{DB_PASSWORD}@{DB_ENDPOINT}/{DB_NAME}"
 
-engine = create_async_engine(DATABASE_URL, echo=True, poolclass= NullPool)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
+def establish_connection(database_url):
+    engine = create_async_engine(database_url, echo=True, poolclass= NullPool)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession)
+    return engine, SessionLocal
+
+engine, SessionLocal = establish_connection(DATABASE_URL)
+
 Base = declarative_base()
 
 app = FastAPI()
@@ -179,8 +184,9 @@ async def init_db():
         await conn.run_sync(Base.metadata.create_all)
 
 import asyncio
-asyncio.run(init_db())
+
 
 if __name__ == "__main__":
+    asyncio.run(init_db())
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
